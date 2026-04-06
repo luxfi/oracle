@@ -1,30 +1,7 @@
-# LLM.md - Hanzo Oracle
+# oracle — AI Assistant Context
 
-## Overview
+# Lux Oracle
+
 **License: AGPL-3.0-only**
 
-## Tech Stack
-- **Language**: Unknown
-
-## Build & Run
-```bash
-
-
-```
-
-## Structure
-```
-oracle/
-  LICENSE
-  README.md
-  cache/
-  contracts/
-  foundry.lock
-  foundry.toml
-  lib/
-  out/
-  remappings.txt
-```
-
-## Key Files
-- `README.md` -- Project documentation
+This repository contains the UMA-derived Optimistic Oracle and registry contracts for the Lux prediction market ecosystem.
