@@ -15,6 +15,7 @@ package vm
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
+	"github.com/luxfi/oracle/pkg/profile"
 	"github.com/luxfi/runtime"
 	"github.com/luxfi/vm/chain"
 	vmcore "github.com/luxfi/vm"
@@ -69,6 +71,11 @@ type Config struct {
 	// Attestation settings
 	RequireQuorumCert    bool   `json:"requireQuorumCert"`
 	QuorumThreshold      int    `json:"quorumThreshold"`
+
+	// LegacyClassicalEnabled opts the chain into accepting Ed25519 observations
+	// from operators that haven't migrated to ML-DSA-65 yet. Default (false)
+	// is strict-PQ: only ML-DSA-65 observations / records are accepted.
+	LegacyClassicalEnabled bool `json:"legacyClassicalEnabled"`
 }
 
 // DefaultConfig returns default OracleVM configuration
@@ -100,13 +107,16 @@ type Feed struct {
 	Metadata     map[string]string `json:"metadata"`
 }
 
-// Observation represents a signed observation from an operator
+// Observation represents a signed observation from an operator.
+// Scheme defaults to ML-DSA-65 (FIPS 204) under strict-PQ; SchemeEd25519
+// is only accepted by VMs configured with LegacyClassicalEnabled.
 type Observation struct {
 	FeedID       ids.ID    `json:"feedId"`
 	Value        []byte    `json:"value"`
 	Timestamp    time.Time `json:"timestamp"`
 	SourceMeta   [32]byte  `json:"sourceMetaHash"`
 	OperatorID   ids.NodeID `json:"operatorId"`
+	Scheme       profile.Scheme `json:"scheme"`
 	Signature    []byte    `json:"signature"`
 }
 
@@ -163,7 +173,8 @@ const (
 	RequestStatusFailed
 )
 
-// OracleRecord represents a single execution record from an executor
+// OracleRecord represents a single execution record from an executor.
+// Scheme defaults to ML-DSA-65 (FIPS 204) under strict-PQ.
 type OracleRecord struct {
 	RequestID   [32]byte   `json:"requestId"`
 	Executor    ids.NodeID `json:"executor"`
@@ -172,6 +183,7 @@ type OracleRecord struct {
 	BodyHash    [32]byte   `json:"bodyHash"`     // Hash of request/response body
 	ResultCode  uint32     `json:"resultCode"`   // HTTP status or custom code
 	ExternalRef []byte     `json:"externalRef"`  // External system reference (txid, etc.)
+	Scheme      profile.Scheme `json:"scheme"`   // Signing scheme tag
 	Signature   []byte     `json:"signature"`    // Executor's signature over record
 }
 
@@ -233,6 +245,13 @@ type VM struct {
 	requests      map[[32]byte]*OracleRequest     // request_id -> request
 	requestRecords map[[32]byte][]*OracleRecord   // request_id -> records from executors
 	commits       map[[32]byte]*OracleCommit      // request_id -> Merkle commitment
+
+	// Operator key registry. Scheme-tagged so the profile gate can refuse
+	// classical material under strict-PQ without ever invoking ed25519.Verify.
+	operatorKeys map[ids.NodeID]operatorKey
+
+	// Signing-profile policy. Default (zero-value) refuses Ed25519.
+	policy profile.Policy
 
 	// Block management
 	lastAcceptedID ids.ID
@@ -296,6 +315,7 @@ func (vm *VM) Initialize(ctx context.Context, init vmcore.Init) error {
 	vm.requests = make(map[[32]byte]*OracleRequest)
 	vm.requestRecords = make(map[[32]byte][]*OracleRecord)
 	vm.commits = make(map[[32]byte]*OracleCommit)
+	vm.operatorKeys = make(map[ids.NodeID]operatorKey)
 
 	// Parse configuration
 	if len(init.Config) > 0 {
@@ -305,6 +325,7 @@ func (vm *VM) Initialize(ctx context.Context, init vmcore.Init) error {
 	} else {
 		vm.config = DefaultConfig()
 	}
+	vm.policy = profile.Policy{LegacyClassicalEnabled: vm.config.LegacyClassicalEnabled}
 
 	// Parse genesis
 	genesis := &Genesis{}
@@ -1005,4 +1026,115 @@ func (vm *VM) GenerateInclusionProof(requestID [32]byte, recordIndex int) ([][]b
 	}
 
 	return proof, nil
+}
+
+// =============================================================================
+// Operator Key Registry + PQ-Native Signature Verification
+// =============================================================================
+
+// operatorKey is the registered identity of an oracle operator (observer
+// or executor). The scheme tag is load-bearing: under strict-PQ the policy
+// gate refuses Ed25519 entries before any signature math runs.
+type operatorKey struct {
+	scheme profile.Scheme
+	pub    []byte
+}
+
+// RegisterOperatorKey registers an operator's public key under the given
+// scheme. Registration itself does not refuse classical keys — that
+// decision belongs to the verifier so operators can introspect their own
+// legacy registrations even under strict-PQ. Verification is the gate.
+func (vm *VM) RegisterOperatorKey(nodeID ids.NodeID, scheme profile.Scheme, publicKey []byte) error {
+	vm.mu.Lock()
+	defer vm.mu.Unlock()
+
+	switch scheme {
+	case profile.SchemeMLDSA65:
+		if len(publicKey) != profile.MLDSA65PublicKeySize {
+			return fmt.Errorf("invalid ml-dsa-65 public key size: %d != %d",
+				len(publicKey), profile.MLDSA65PublicKeySize)
+		}
+	case profile.SchemeEd25519:
+		if len(publicKey) != 32 {
+			return fmt.Errorf("invalid ed25519 public key size: %d != 32", len(publicKey))
+		}
+	default:
+		return fmt.Errorf("unknown signing scheme: %s", scheme)
+	}
+
+	if vm.operatorKeys == nil {
+		vm.operatorKeys = make(map[ids.NodeID]operatorKey)
+	}
+	vm.operatorKeys[nodeID] = operatorKey{scheme: scheme, pub: append([]byte(nil), publicKey...)}
+	if vm.log != nil && !vm.log.IsZero() {
+		vm.log.Info("registered operator key",
+			log.Stringer("nodeID", nodeID),
+			log.String("scheme", scheme.String()),
+		)
+	}
+	return nil
+}
+
+// observationMessage returns the canonical byte string an operator signs
+// when attesting an Observation. Domain separation lives in profile.ContextTag,
+// not here.
+func observationMessage(obs *Observation) []byte {
+	h := sha256.New()
+	h.Write([]byte("LUX:OracleObservation:v1"))
+	h.Write(obs.FeedID[:])
+	h.Write(obs.Value)
+	var ts [8]byte
+	binary.BigEndian.PutUint64(ts[:], uint64(obs.Timestamp.UnixNano()))
+	h.Write(ts[:])
+	h.Write(obs.SourceMeta[:])
+	h.Write(obs.OperatorID[:])
+	return h.Sum(nil)
+}
+
+// VerifyObservationSignature checks an Observation's signature under the
+// active profile policy. Strict-PQ refuses any classical observation
+// before any signature math runs.
+func (vm *VM) VerifyObservationSignature(obs *Observation) error {
+	vm.mu.RLock()
+	op, exists := vm.operatorKeys[obs.OperatorID]
+	policy := vm.policy
+	vm.mu.RUnlock()
+
+	if !exists {
+		return fmt.Errorf("verify observation: no registered key for operator %s", obs.OperatorID)
+	}
+	return profile.Verify(policy, op.scheme, op.pub, observationMessage(obs), obs.Signature)
+}
+
+// recordMessage returns the canonical byte string an executor signs when
+// emitting an OracleRecord.
+func recordMessage(r *OracleRecord) []byte {
+	h := sha256.New()
+	h.Write([]byte("LUX:OracleRecord:v1"))
+	h.Write(r.RequestID[:])
+	h.Write(r.Executor[:])
+	var ts [8]byte
+	binary.BigEndian.PutUint64(ts[:], r.Timestamp)
+	h.Write(ts[:])
+	h.Write([]byte(r.Endpoint))
+	h.Write(r.BodyHash[:])
+	var rc [4]byte
+	binary.BigEndian.PutUint32(rc[:], r.ResultCode)
+	h.Write(rc[:])
+	h.Write(r.ExternalRef)
+	return h.Sum(nil)
+}
+
+// VerifyRecordSignature checks an OracleRecord's signature under the
+// active profile policy.
+func (vm *VM) VerifyRecordSignature(r *OracleRecord) error {
+	vm.mu.RLock()
+	op, exists := vm.operatorKeys[r.Executor]
+	policy := vm.policy
+	vm.mu.RUnlock()
+
+	if !exists {
+		return fmt.Errorf("verify record: no registered key for executor %s", r.Executor)
+	}
+	return profile.Verify(policy, op.scheme, op.pub, recordMessage(r), r.Signature)
 }
