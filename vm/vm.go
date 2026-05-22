@@ -34,6 +34,7 @@ import (
 	"github.com/luxfi/consensus/engine/dag/vertex"
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/artifacts"
+	"github.com/luxfi/node/vms/types/fee"
 )
 
 var (
@@ -253,6 +254,11 @@ type VM struct {
 	// Signing-profile policy. Default (zero-value) refuses Ed25519.
 	policy profile.Policy
 
+	// Fee policy. O-Chain is service-only — observations arrive from
+	// the operator committee via consensus, not a user mempool — so
+	// this is the fee.NoUserTxPolicy sentinel.
+	feePolicy fee.Policy
+
 	// Block management
 	lastAcceptedID ids.ID
 	lastAccepted   *Block
@@ -326,6 +332,14 @@ func (vm *VM) Initialize(ctx context.Context, init vmcore.Init) error {
 		vm.config = DefaultConfig()
 	}
 	vm.policy = profile.Policy{LegacyClassicalEnabled: vm.config.LegacyClassicalEnabled}
+
+	// Pin fee policy. O-Chain is service-only — operator observations
+	// arrive via consensus, not a user mempool. Attach the
+	// NoUserTxPolicy sentinel; fee.Validate passes for the sentinel.
+	vm.feePolicy = fee.NoUserTxPolicy{}
+	if err := fee.Validate(vm.feePolicy); err != nil {
+		return fmt.Errorf("oraclevm: fee policy: %w", err)
+	}
 
 	// Parse genesis
 	genesis := &Genesis{}
