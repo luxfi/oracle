@@ -41,12 +41,12 @@ type OracleVertex struct {
 	vm           *VM
 }
 
-func (v *OracleVertex) ID() ids.ID          { return v.id }
-func (v *OracleVertex) Bytes() []byte        { return v.bytes }
-func (v *OracleVertex) Height() uint64       { return v.height }
-func (v *OracleVertex) Epoch() uint32        { return v.epoch }
-func (v *OracleVertex) Parents() []ids.ID    { return v.parents }
-func (v *OracleVertex) Txs() []ids.ID        { return v.txIDs }
+func (v *OracleVertex) ID() ids.ID             { return v.id }
+func (v *OracleVertex) Bytes() []byte          { return v.bytes }
+func (v *OracleVertex) Height() uint64         { return v.height }
+func (v *OracleVertex) Epoch() uint32          { return v.epoch }
+func (v *OracleVertex) Parents() []ids.ID      { return v.parents }
+func (v *OracleVertex) Txs() []ids.ID          { return v.txIDs }
 func (v *OracleVertex) Status() choices.Status { return v.status }
 
 func (v *OracleVertex) Verify(ctx context.Context) error {
