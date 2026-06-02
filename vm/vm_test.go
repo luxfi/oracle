@@ -304,10 +304,10 @@ func TestCreateAttestation(t *testing.T) {
 
 	operatorID := ids.GenerateTestNodeID()
 	feed := &Feed{
-		ID:          ids.GenerateTestID(),
-		Name:        "attestation-test",
-		UpdateFreq:  time.Minute,
-		Operators:   []ids.NodeID{operatorID},
+		ID:         ids.GenerateTestID(),
+		Name:       "attestation-test",
+		UpdateFreq: time.Minute,
+		Operators:  []ids.NodeID{operatorID},
 	}
 	err := vm.RegisterFeed(feed)
 	require.NoError(err)

@@ -28,8 +28,8 @@ import (
 	"github.com/luxfi/log"
 	"github.com/luxfi/oracle/pkg/profile"
 	"github.com/luxfi/runtime"
-	"github.com/luxfi/vm/chain"
 	vmcore "github.com/luxfi/vm"
+	"github.com/luxfi/vm/chain"
 
 	"github.com/luxfi/consensus/engine/dag/vertex"
 	"github.com/luxfi/node/version"
@@ -57,21 +57,21 @@ var (
 // Config contains OracleVM configuration
 type Config struct {
 	// Feed settings
-	MaxFeedsPerBlock     int    `json:"maxFeedsPerBlock"`
-	ObservationWindow    string `json:"observationWindow"`
-	MinObservers         int    `json:"minObservers"`
+	MaxFeedsPerBlock  int    `json:"maxFeedsPerBlock"`
+	ObservationWindow string `json:"observationWindow"`
+	MinObservers      int    `json:"minObservers"`
 
 	// Aggregation settings
-	AggregationMethod    string `json:"aggregationMethod"` // median, twap, weighted
-	DeviationThreshold   uint64 `json:"deviationThreshold"` // basis points
+	AggregationMethod  string `json:"aggregationMethod"`  // median, twap, weighted
+	DeviationThreshold uint64 `json:"deviationThreshold"` // basis points
 
 	// ZK settings
-	EnableZKAggregation  bool   `json:"enableZkAggregation"`
-	ZKProofSystem        string `json:"zkProofSystem"` // groth16, plonk
+	EnableZKAggregation bool   `json:"enableZkAggregation"`
+	ZKProofSystem       string `json:"zkProofSystem"` // groth16, plonk
 
 	// Attestation settings
-	RequireQuorumCert    bool   `json:"requireQuorumCert"`
-	QuorumThreshold      int    `json:"quorumThreshold"`
+	RequireQuorumCert bool `json:"requireQuorumCert"`
+	QuorumThreshold   int  `json:"quorumThreshold"`
 
 	// LegacyClassicalEnabled opts the chain into accepting Ed25519 observations
 	// from operators that haven't migrated to ML-DSA-65 yet. Default (false)
@@ -96,29 +96,29 @@ func DefaultConfig() Config {
 
 // Feed represents an oracle data feed
 type Feed struct {
-	ID           ids.ID            `json:"id"`
-	Name         string            `json:"name"`
-	Description  string            `json:"description"`
-	Sources      []string          `json:"sources"`
-	UpdateFreq   time.Duration     `json:"updateFreq"`
-	PolicyHash   [32]byte          `json:"policyHash"`
-	Operators    []ids.NodeID      `json:"operators"`
-	CreatedAt    time.Time         `json:"createdAt"`
-	Status       string            `json:"status"`
-	Metadata     map[string]string `json:"metadata"`
+	ID          ids.ID            `json:"id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Sources     []string          `json:"sources"`
+	UpdateFreq  time.Duration     `json:"updateFreq"`
+	PolicyHash  [32]byte          `json:"policyHash"`
+	Operators   []ids.NodeID      `json:"operators"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	Status      string            `json:"status"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 // Observation represents a signed observation from an operator.
 // Scheme defaults to ML-DSA-65 (FIPS 204) under strict-PQ; SchemeEd25519
 // is only accepted by VMs configured with LegacyClassicalEnabled.
 type Observation struct {
-	FeedID       ids.ID    `json:"feedId"`
-	Value        []byte    `json:"value"`
-	Timestamp    time.Time `json:"timestamp"`
-	SourceMeta   [32]byte  `json:"sourceMetaHash"`
-	OperatorID   ids.NodeID `json:"operatorId"`
-	Scheme       profile.Scheme `json:"scheme"`
-	Signature    []byte    `json:"signature"`
+	FeedID     ids.ID         `json:"feedId"`
+	Value      []byte         `json:"value"`
+	Timestamp  time.Time      `json:"timestamp"`
+	SourceMeta [32]byte       `json:"sourceMetaHash"`
+	OperatorID ids.NodeID     `json:"operatorId"`
+	Scheme     profile.Scheme `json:"scheme"`
+	Signature  []byte         `json:"signature"`
 }
 
 // AggregatedValue represents the canonical output for a feed
@@ -147,7 +147,7 @@ const (
 // OracleRequest represents a deterministic request from PlatformVM
 // request_id = H(service_id || session_id || step || retry_index || txid)
 type OracleRequest struct {
-	RequestID      [32]byte      `json:"requestId"`      // Deterministic: H(service_id || session_id || step || retry || txid)
+	RequestID      [32]byte      `json:"requestId"` // Deterministic: H(service_id || session_id || step || retry || txid)
 	ServiceID      ids.ID        `json:"serviceId"`
 	SessionID      ids.ID        `json:"sessionId"`
 	Step           uint32        `json:"step"`
@@ -177,24 +177,24 @@ const (
 // OracleRecord represents a single execution record from an executor.
 // Scheme defaults to ML-DSA-65 (FIPS 204) under strict-PQ.
 type OracleRecord struct {
-	RequestID   [32]byte   `json:"requestId"`
-	Executor    ids.NodeID `json:"executor"`
-	Timestamp   uint64     `json:"timestamp"`
-	Endpoint    string     `json:"endpoint"`     // Or compact endpoint ID
-	BodyHash    [32]byte   `json:"bodyHash"`     // Hash of request/response body
-	ResultCode  uint32     `json:"resultCode"`   // HTTP status or custom code
-	ExternalRef []byte     `json:"externalRef"`  // External system reference (txid, etc.)
-	Scheme      profile.Scheme `json:"scheme"`   // Signing scheme tag
-	Signature   []byte     `json:"signature"`    // Executor's signature over record
+	RequestID   [32]byte       `json:"requestId"`
+	Executor    ids.NodeID     `json:"executor"`
+	Timestamp   uint64         `json:"timestamp"`
+	Endpoint    string         `json:"endpoint"`    // Or compact endpoint ID
+	BodyHash    [32]byte       `json:"bodyHash"`    // Hash of request/response body
+	ResultCode  uint32         `json:"resultCode"`  // HTTP status or custom code
+	ExternalRef []byte         `json:"externalRef"` // External system reference (txid, etc.)
+	Scheme      profile.Scheme `json:"scheme"`      // Signing scheme tag
+	Signature   []byte         `json:"signature"`   // Executor's signature over record
 }
 
 // OracleCommit represents a Merkle root commitment for a request
 type OracleCommit struct {
-	RequestID  [32]byte  `json:"requestId"`
-	Kind       RequestKind `json:"kind"`
-	Root       [32]byte  `json:"root"`         // MerkleRoot(records)
-	RecordCount uint32   `json:"recordCount"`
-	Window     struct {
+	RequestID   [32]byte    `json:"requestId"`
+	Kind        RequestKind `json:"kind"`
+	Root        [32]byte    `json:"root"` // MerkleRoot(records)
+	RecordCount uint32      `json:"recordCount"`
+	Window      struct {
 		Start uint64 `json:"start"`
 		End   uint64 `json:"end"`
 	} `json:"window"`
@@ -243,9 +243,9 @@ type VM struct {
 	values map[ids.ID]map[uint64]*AggregatedValue
 
 	// Session-ready: Oracle Requests (External Write/Read)
-	requests      map[[32]byte]*OracleRequest     // request_id -> request
-	requestRecords map[[32]byte][]*OracleRecord   // request_id -> records from executors
-	commits       map[[32]byte]*OracleCommit      // request_id -> Merkle commitment
+	requests       map[[32]byte]*OracleRequest  // request_id -> request
+	requestRecords map[[32]byte][]*OracleRecord // request_id -> records from executors
+	commits        map[[32]byte]*OracleCommit   // request_id -> Merkle commitment
 
 	// Operator key registry. Scheme-tagged so the profile gate can refuse
 	// classical material under strict-PQ without ever invoking ed25519.Verify.
@@ -282,10 +282,10 @@ type Block struct {
 	Timestamp_ time.Time `json:"timestamp"`
 
 	// Oracle-specific data
-	Observations  []*Observation     `json:"observations,omitempty"`
-	Aggregations  []*AggregatedValue `json:"aggregations,omitempty"`
-	FeedUpdates   []*Feed            `json:"feedUpdates,omitempty"`
-	Attestations  []*artifacts.OracleAttestation `json:"attestations,omitempty"`
+	Observations []*Observation                 `json:"observations,omitempty"`
+	Aggregations []*AggregatedValue             `json:"aggregations,omitempty"`
+	FeedUpdates  []*Feed                        `json:"feedUpdates,omitempty"`
+	Attestations []*artifacts.OracleAttestation `json:"attestations,omitempty"`
 
 	bytes []byte
 	vm    *VM
@@ -293,9 +293,9 @@ type Block struct {
 
 // Genesis represents the genesis state
 type Genesis struct {
-	Version   int    `json:"version"`
-	Message   string `json:"message"`
-	Timestamp int64  `json:"timestamp"`
+	Version      int     `json:"version"`
+	Message      string  `json:"message"`
+	Timestamp    int64   `json:"timestamp"`
 	InitialFeeds []*Feed `json:"initialFeeds,omitempty"`
 }
 
@@ -682,12 +682,12 @@ func (blk *Block) computeID() ids.ID {
 	return ids.ID(hash)
 }
 
-func (blk *Block) ID() ids.ID         { return blk.ID_ }
-func (blk *Block) Parent() ids.ID     { return blk.ParentID_ }
-func (blk *Block) ParentID() ids.ID   { return blk.ParentID_ }
-func (blk *Block) Height() uint64     { return blk.Height_ }
+func (blk *Block) ID() ids.ID           { return blk.ID_ }
+func (blk *Block) Parent() ids.ID       { return blk.ParentID_ }
+func (blk *Block) ParentID() ids.ID     { return blk.ParentID_ }
+func (blk *Block) Height() uint64       { return blk.Height_ }
 func (blk *Block) Timestamp() time.Time { return blk.Timestamp_ }
-func (blk *Block) Status() uint8      { return 0 }
+func (blk *Block) Status() uint8        { return 0 }
 
 func (blk *Block) Verify(ctx context.Context) error {
 	return nil
