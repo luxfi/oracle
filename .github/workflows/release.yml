@@ -19,7 +19,7 @@ env:
 
 jobs:
   resolve-ref:
-    runs-on: luxfi-amd64
+    runs-on: [self-hosted, linux, amd64]
     outputs:
       ref: ${{ steps.r.outputs.ref }}
       tag: ${{ steps.r.outputs.tag }}
@@ -41,12 +41,12 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: luxfi-amd64
+            runner: '["self-hosted","linux","amd64"]'
             platform: linux/amd64
           - arch: arm64
-            runner: luxfi-arm64
+            runner: '["self-hosted","linux","arm64"]'
             platform: linux/arm64
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ fromJson(matrix.runner) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -86,7 +86,7 @@ jobs:
 
   merge:
     needs: [resolve-ref, build]
-    runs-on: luxfi-amd64
+    runs-on: [self-hosted, linux, amd64]
     steps:
       - uses: actions/download-artifact@v4
         with:
