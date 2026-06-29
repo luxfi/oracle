@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="oracle" width="880"></p>
+
 # Lux Oracle
 
 **License: AGPL-3.0-only**
