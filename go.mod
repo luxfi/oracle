@@ -20,7 +20,6 @@ require (
 	filippo.io/hpke v0.4.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/StephenButtolph/canoto v0.17.3 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.5 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.5 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.13 // indirect
@@ -54,7 +53,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/getsentry/sentry-go v0.44.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20260601182631-00ed12fed2a6 // indirect
@@ -74,10 +72,9 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/accel v1.2.4 // indirect
-	github.com/luxfi/age v1.5.1 // indirect
+	github.com/luxfi/age v1.6.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.3.1 // indirect
-	github.com/luxfi/codec v1.2.1 // indirect
 	github.com/luxfi/compress v0.1.1 // indirect
 	github.com/luxfi/concurrent v0.1.1 // indirect
 	github.com/luxfi/constants v1.6.2 // indirect
@@ -89,7 +86,7 @@ require (
 	github.com/luxfi/metric v1.8.1 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/p2p v1.22.1 // indirect
-	github.com/luxfi/pq v1.0.3 // indirect
+	github.com/luxfi/pq v1.1.0 // indirect
 	github.com/luxfi/sampler v1.1.0 // indirect
 	github.com/luxfi/timer v1.1.1 // indirect
 	github.com/luxfi/utils v1.3.1 // indirect
@@ -102,7 +99,6 @@ require (
 	github.com/miekg/dns v1.1.72 // indirect
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.0.100 // indirect
 	github.com/mr-tron/base58 v1.3.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
