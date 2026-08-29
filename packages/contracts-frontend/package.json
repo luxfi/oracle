@@ -3,14 +3,14 @@
   "version": "0.4.16",
   "description": "UMA smart contracts and unit tests",
   "devDependencies": {
-    "@across-protocol/contracts": "^0.1.4",
-    "@ethersproject/abi": "^5.4.0",
-    "@ethersproject/abstract-provider": "^5.4.0",
-    "@ethersproject/contracts": "^5.4.0",
-    "@ethersproject/providers": "^5.4.2",
-    "@uma/common": "^2.33.0",
-    "@uma/core": "^2.55.0",
-    "ethers": "^5.4.2"
+    "@across-protocol/contracts": "^5.0.26",
+    "@ethersproject/abi": "^5.8.0",
+    "@ethersproject/abstract-provider": "^5.8.0",
+    "@ethersproject/contracts": "^5.8.0",
+    "@ethersproject/providers": "^5.8.0",
+    "@uma/common": "^2.40.0",
+    "@uma/core": "^2.62.2",
+    "ethers": "^6.17.0"
   },
   "homepage": "https://umaproject.org",
   "license": "AGPL-3.0-or-later",

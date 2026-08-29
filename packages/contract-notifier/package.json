@@ -6,11 +6,11 @@
   "license": "AGPL-3.0-or-later",
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/datastore": "^7.0.0",
-    "@uma/common": "^2.33.0",
-    "@uma/financial-templates-lib": "^2.32.11",
-    "async-retry": "^1.3.1",
-    "dotenv": "^6.2.0"
+    "@google-cloud/datastore": "^11.0.1",
+    "@uma/common": "^2.40.0",
+    "@uma/financial-templates-lib": "^2.37.2",
+    "async-retry": "^1.3.3",
+    "dotenv": "^17.4.2"
   },
   "repository": {
     "type": "git",
