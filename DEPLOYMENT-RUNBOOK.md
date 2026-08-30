@@ -7,7 +7,7 @@
 
 ```sh
 ORACLED_OPERATOR_ID=NodeID-... \
-ORACLED_ORACLE_RPC=http://127.0.0.1:9650/v1/bc/O/rpc \
+ORACLED_ORACLE_RPC=http://127.0.0.1:9650/v1/chain/O/rpc \
 ORACLED_LISTEN=:7800 \
 ORACLED_ZAP_PORT=7810 \
 oracled
@@ -19,7 +19,7 @@ oracled
 |---|---|---|
 | `ORACLED_LISTEN` / `--listen` | `:7800` | HTTP listen address. |
 | `ORACLED_ZAP_PORT` / `--zap-port` | `7810` | Intra-Lux ZAP plane port. `0` disables. |
-| `ORACLED_ORACLE_RPC` / `--oracle-rpc` | `http://127.0.0.1:9650/v1/bc/O/rpc` | O-Chain JSON-RPC URL. |
+| `ORACLED_ORACLE_RPC` / `--oracle-rpc` | `http://127.0.0.1:9650/v1/chain/O/rpc` | O-Chain JSON-RPC URL. |
 | `ORACLED_OPERATOR_ID` / `--operator-id` | (required) | This operator's NodeID. |
 
 ## Signing-profile decision
@@ -65,12 +65,12 @@ These are NOT subject to the PQ-default rule:
 
 ```sh
 # Liveness probe (via O-Chain RPC)
-curl -fsS http://127.0.0.1:9650/v1/bc/O/rpc \
+curl -fsS http://127.0.0.1:9650/v1/chain/O/rpc \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"oracle.Health","params":{}}' | jq
 
 # Feed list / latest value
-curl -fsS http://127.0.0.1:9650/v1/bc/O/rpc \
+curl -fsS http://127.0.0.1:9650/v1/chain/O/rpc \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"oracle.GetValue","params":{"feedId":"<id>"}}' | jq
 ```
