@@ -29,7 +29,7 @@ func main() {
 	var (
 		listenAddr = flag.String("listen", env("ORACLED_LISTEN", ":7800"), "HTTP listen address")
 		zapPort    = flag.Int("zap-port", envInt("ORACLED_ZAP_PORT", defaultZAPPort), "intra-Lux ZAP operator-plane port (0 = disabled)")
-		oracleRPC  = flag.String("oracle-rpc", env("ORACLED_ORACLE_RPC", "http://127.0.0.1:9650/v1/bc/O/rpc"), "O-Chain (oraclevm) JSON-RPC URL")
+		oracleRPC  = flag.String("oracle-rpc", env("ORACLED_ORACLE_RPC", "http://127.0.0.1:9650/v1/chain/O/rpc"), "O-Chain (oraclevm) JSON-RPC URL")
 		operatorID = flag.String("operator-id", env("ORACLED_OPERATOR_ID", ""), "this operator's NodeID")
 		showVer    = flag.Bool("version", false, "print version and exit")
 	)
