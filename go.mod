@@ -1,6 +1,6 @@
 module github.com/luxfi/oracle
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/gorilla/rpc v1.2.1
@@ -9,9 +9,9 @@ require (
 	github.com/luxfi/database v1.21.5
 	github.com/luxfi/ids v1.3.2
 	github.com/luxfi/log v1.4.3
-	github.com/luxfi/node v1.36.15
 	github.com/luxfi/runtime v1.3.1
-	github.com/luxfi/vm v1.3.16
+	github.com/luxfi/version v1.1.2
+	github.com/luxfi/vm v1.3.17
 	github.com/luxfi/zap v1.2.6
 	github.com/stretchr/testify v1.11.1
 )
@@ -55,7 +55,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/getsentry/sentry-go v0.44.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/go-json-experiment/json v0.0.0-20260601182631-00ed12fed2a6 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -90,10 +89,8 @@ require (
 	github.com/luxfi/p2p v1.22.1 // indirect
 	github.com/luxfi/pq v1.1.0 // indirect
 	github.com/luxfi/sampler v1.1.0 // indirect
-	github.com/luxfi/timer v1.1.1 // indirect
 	github.com/luxfi/utils v1.3.1 // indirect
 	github.com/luxfi/validators v1.3.1 // indirect
-	github.com/luxfi/version v1.0.1 // indirect
 	github.com/luxfi/warp v1.24.1 // indirect
 	github.com/luxfi/zapdb v1.10.6 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect

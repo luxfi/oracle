@@ -32,9 +32,9 @@ import (
 	vmcore "github.com/luxfi/vm"
 
 	"github.com/luxfi/consensus/engine/dag/vertex"
-	"github.com/luxfi/node/version"
-	"github.com/luxfi/node/vms/artifacts"
-	"github.com/luxfi/node/vms/types/fee"
+	"github.com/luxfi/version"
+	"github.com/luxfi/vm/vms/artifacts"
+	"github.com/luxfi/vm/vms/types/fee"
 )
 
 var (

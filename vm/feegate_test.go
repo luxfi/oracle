@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/vms/types/fee"
+	"github.com/luxfi/vm/vms/types/fee"
 )
 
 func TestOracleVM_FeePolicy_IsNoUserTxSentinel(t *testing.T) {
