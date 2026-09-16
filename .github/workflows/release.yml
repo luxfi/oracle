@@ -44,7 +44,7 @@ jobs:
             runner: '["linux-amd64"]'
             platform: linux/amd64
           - arch: arm64
-            runner: '["self-hosted","linux","arm64"]'
+            runner: '["linux-arm64"]'
             platform: linux/arm64
     runs-on: ${{ fromJson(matrix.runner) }}
     steps:
