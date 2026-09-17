@@ -18,7 +18,7 @@ var VMID = ids.ID{'o', 'r', 'a', 'c', 'l', 'e', 'v', 'm'}
 type Factory struct{}
 
 // New returns a new instance of the OracleVM
-func (f *Factory) New(logger log.Logger) (interface{}, error) {
+func (f *Factory) New(logger log.Logger) (any, error) {
 	return &VM{
 		feeds:         make(map[ids.ID]*Feed),
 		pendingObs:    make(map[ids.ID][]*Observation),

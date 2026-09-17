@@ -256,7 +256,7 @@ func TestServiceRPC(t *testing.T) {
 	service.ServeHTTP(rec, req)
 	require.Equal(http.StatusOK, rec.Code)
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	err := json.NewDecoder(rec.Body).Decode(&resp)
 	require.NoError(err)
 	require.NotNil(resp["result"])
@@ -287,12 +287,12 @@ func TestServiceRegisterFeed(t *testing.T) {
 	service.ServeHTTP(rec, req)
 	require.Equal(http.StatusOK, rec.Code)
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	err := json.NewDecoder(rec.Body).Decode(&resp)
 	require.NoError(err)
 	require.NotNil(resp["result"])
 
-	result := resp["result"].(map[string]interface{})
+	result := resp["result"].(map[string]any)
 	require.NotEmpty(result["feedId"])
 }
 
@@ -304,10 +304,10 @@ func TestCreateAttestation(t *testing.T) {
 
 	operatorID := ids.GenerateTestNodeID()
 	feed := &Feed{
-		ID:          ids.GenerateTestID(),
-		Name:        "attestation-test",
-		UpdateFreq:  time.Minute,
-		Operators:   []ids.NodeID{operatorID},
+		ID:         ids.GenerateTestID(),
+		Name:       "attestation-test",
+		UpdateFreq: time.Minute,
+		Operators:  []ids.NodeID{operatorID},
 	}
 	err := vm.RegisterFeed(feed)
 	require.NoError(err)
